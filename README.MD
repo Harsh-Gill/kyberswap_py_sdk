@@ -30,7 +30,7 @@ pip install kyberswap_py_sdk
 2. Or Directly Clone the repository:
 
    ```Bash
-   git clone https://github.com/your-repo/kyberswap-python-sdk.git
+   git clone https://github.com/Harsh-Gill/kyberswap_py_sdk.git
    cd kyberswap-python-sdk
    pip install -r requirements.txt
    ```
@@ -179,4 +179,5 @@ The SDK includes robust error handling for:
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
+
 # kyberswap_py_sdk
