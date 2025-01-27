@@ -8,7 +8,7 @@ setup(
     description='A Python SDK for the KyberSwap Aggregator API',
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
-    url='https://github.com/your-repo/kyberswap-python-sdk',  # Update with your repository URL
+    url='https://github.com/Harsh-Gill/kyberswap_py_sdk',  # Update with your repository URL
     packages=find_packages(),
     install_requires=[
         'web3',
