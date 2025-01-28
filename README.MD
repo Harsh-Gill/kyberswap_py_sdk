@@ -8,10 +8,11 @@ For questions or feedback, feel free to reach out!
 
 This is an amazing way to effortlessly swap and execute trades across major blockchain networks using Python with super minimal code! The Python SDK for KyberSwap Aggregator API offers a simple and intuitive interface for developers. With this SDK, you can easily:
 
-Fetch swap routes
-Build transactions
-Execute swaps on supported chains
-The SDK is designed to be modular, extensible, and developer-friendly, making it a great choice for anyone building DeFi applications. Here's a quick example to show you how it works. Its a Swap of SHIB to PEPE on ETH mainnet.
+- Fetch swap routes
+- Build transactions
+- Execute swaps on supported chains
+
+Here's a quick example to show you how it works. Its a Swap of SHIB to PEPE on ETH mainnet (More in this article : https://medium.com/@harshgill2954/easiest-way-to-swap-tokens-in-python-kyberswap-python-sdk-tenderly-basehound-d2dbec12f5b5).
 
 ```bash
 pip install kyberswap-py-sdk
