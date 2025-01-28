@@ -13,6 +13,10 @@ Build transactions
 Execute swaps on supported chains
 The SDK is designed to be modular, extensible, and developer-friendly, making it a great choice for anyone building DeFi applications. Here's a quick example to show you how it works. Its a Swap of SHIB to PEPE on ETH mainnet.
 
+```bash
+pip install kyberswap-py-sdk
+```
+
 ```python
 
 from kyberswap_py_sdk import KyberSwapSDK, ChainName, ChainId, Token
