@@ -1,16 +1,66 @@
-# KyberSwap Python SDK
-
-This Python SDK provides a simple and easy-to-use interface for interacting with the KyberSwap Aggregator API. It allows you to fetch swap routes, build transactions, and execute swaps on supported chains. The SDK is designed to be modular, extensible, and developer-friendly.
-
-## Before Anything, Thank You KyberSwap!
-
-We would like to extend our heartfelt thanks to KyberSwap for providing such an amazing and free service. Your aggregator API has made it incredibly easy for developers to integrate decentralized swaps into their applications. Keep up the great work!
-
 ## Developed with ❤️ by Harsh from BaseNerds/Basehound.
+
+<img src="assets/basehoundlogo.jpg" alt="Alt text" width="100">
 
 For questions or feedback, feel free to reach out!
 
+# KyberSwap Python SDK
+
+This is an amazing way to effortlessly swap and execute trades across major blockchain networks using Python with super minimal code! The Python SDK for KyberSwap Aggregator API offers a simple and intuitive interface for developers. With this SDK, you can easily:
+
+Fetch swap routes
+Build transactions
+Execute swaps on supported chains
+The SDK is designed to be modular, extensible, and developer-friendly, making it a great choice for anyone building DeFi applications. Here's a quick example to show you how it works. Its a Swap of SHIB to PEPE on ETH mainnet.
+
+```python
+
+from kyberswap_py_sdk import KyberSwapSDK, ChainName, ChainId, Token
+import asyncio
+
+# Define tokens
+token_in = Token(
+    address="0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+    chain_id=ChainId.MAINNET,
+    decimals=18,
+    symbol="SHIB",
+    name="Shiba Inu"
+)
+token_out = Token(
+    address="0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+    chain_id=ChainId.MAINNET,
+    decimals=18,
+    symbol="PEPE",
+    name="Pepe"
+)
+
+# Initialize SDK
+private_key = "YOUR_PRIVATE_KEY"  # Replace with your actual private key
+RPC_URL = "YOUR_RPC_URL"  # Replace with your actual RPC URL
+sdk = KyberSwapSDK(chain=ChainName.MAINNET, rpc_url=RPC_URL, private_key=private_key)
+
+# get swap route
+swap_route = asyncio.run(sdk.get_swap_route(token_in, token_out, amount_in=10.0))
+
+# get info about swap route
+print(f"Swap Route: {swap_route}")
+
+# Execute swap
+tx_receipt = asyncio.run(sdk.execute_swap(token_in, token_out, amount_in=10.0))
+if tx_receipt:
+    print(f"Swap executed successfully! Transaction: {tx_receipt}")
+
+```
+
+## MAJOR CREDITS TO AND THANK YOU to KyberSwap!
+
+We would like to extend our heartfelt thanks to KyberSwap for providing such an amazing and free service. Your aggregator API has made it incredibly easy for developers to integrate decentralized swaps into their applications. Keep up the great work!
+
+Link to their API (Mainly TypeScript) : https://docs.kyberswap.com/kyberswap-solutions/kyberswap-aggregator/developer-guides/execute-a-swap-with-the-aggregator-api
+
 ## Features
+
+### KyberSwap natively supports the following chains: Ethereum (Mainnet), BSC (Binance Smart Chain), Arbitrum, Polygon (Matic), Optimism, Avalanche (AVAX), Base, Cronos, zkSync, Fantom, Linea, Polygon zkEVM, Aurora, BitTorrent (BTTC), and Scroll.
 
 - **Chain Selection**: Easily switch between supported chains (e.g., Ethereum, Polygon, BSC, Arbitrum, etc.).
 - **Token Management**: Define tokens with the `Token` class.
@@ -122,54 +172,9 @@ print(f"Swap executed successfully! Transaction hash: {tx_hash}")
 asyncio.run(execute_swap())
 ```
 
-## Ethereum Mainnet Example - Can use Tenderly
-
-### 1. Initialize SDK for Ethereum Mainnet
-
-Use the appropriate RPC URL and token addresses.
-
-```python
-
-from kyberswap_py_sdk import KyberSwapSDK, ChainName, ChainId, Token
-import asyncio
-
-# Define tokens
-token_in = Token(
-    address="0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
-    chain_id=ChainId.MAINNET,
-    decimals=18,
-    symbol="SHIB",
-    name="Shiba Inu"
-)
-token_out = Token(
-    address="0x6982508145454Ce325dDbE47a25d4ec3d2311933",
-    chain_id=ChainId.MAINNET,
-    decimals=18,
-    symbol="PEPE",
-    name="Pepe"
-)
-
-# Initialize SDK
-private_key = "YOUR_PRIVATE_KEY"  # Replace with your actual private key
-RPC_URL = "YOUR_RPC_URL"  # Replace with your actual RPC URL
-sdk = KyberSwapSDK(chain=ChainName.MAINNET, rpc_url=RPC_URL, private_key=private_key)
-
-# get swap route
-swap_route = asyncio.run(sdk.get_swap_route(token_in, token_out, amount_in=10.0))
-
-# get info about swap route
-print(f"Swap Route: {swap_route}")
-
-# Execute swap
-tx_receipt = asyncio.run(sdk.execute_swap(token_in, token_out, amount_in=10.0))
-if tx_receipt:
-    print(f"Swap executed successfully! Transaction: {tx_receipt}")
-
-```
-
 ## Error Handling
 
-The SDK includes robust error handling for:
+The SDK includes basic error handling for:
 
 - Invalid RPC URLs.
 - Invalid private keys.
@@ -179,5 +184,3 @@ The SDK includes robust error handling for:
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
-
-# kyberswap_py_sdk
