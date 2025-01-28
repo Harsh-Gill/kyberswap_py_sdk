@@ -4,6 +4,7 @@ from web3 import Web3
 from eth_account import Account
 from typing import Optional, Dict, Any
 from web3.middleware import geth_poa_middleware
+import importlib.resources
 
 # Constants
 class AggregatorDomain:
@@ -163,7 +164,8 @@ class KyberSwapSDK:
 
     def _load_erc20_abi(self) -> list:
         """Load the ERC20 ABI from a JSON file."""
-        with open('./abis/erc20.json') as f:
+        # Load the ERC20 ABI from the package
+        with importlib.resources.open_text("kyberswap_py_sdk.abis", "erc20.json") as f:
             return json.load(f)
 
 # # Example Usage
