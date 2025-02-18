@@ -110,7 +110,15 @@ class KyberSwapSDK:
             print(f"Error building swap transaction: {e}")
             return None
 
-    async def execute_swap(self, token_in: Token, token_out: Token, amount_in: float, slippage_tolerance: int = 10) -> Optional[str]:
+    async def execute_swap(self, 
+                           token_in: Token, 
+                           token_out: Token, 
+                           amount_in: float, 
+                           slippage_tolerance: int = 10,
+                           gas_fee_wei : int = 100,
+                           gas : int = 200000,
+                           nonce: Optional[int] = None,
+                           ) -> Optional[str]:
         """Execute a swap transaction on-chain."""
         if not self.signer:
             raise ValueError("Signer is required to execute swaps.")
@@ -126,9 +134,9 @@ class KyberSwapSDK:
         transaction = {
             'to': swap_data['routerAddress'],
             'data': swap_data['data'],
-            'gas': 200000,
-            'gasPrice': self.web3.to_wei('100', 'gwei'),
-            'nonce': self.web3.eth.get_transaction_count(self.signer.address),
+            'gas': gas,
+            'gasPrice': self.web3.to_wei( str(gas_fee_wei), 'gwei'),
+            'nonce': self.web3.eth.get_transaction_count(self.signer.address) if nonce is None else nonce,
         }
         signed_tx = self.signer.sign_transaction(transaction)
         tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
