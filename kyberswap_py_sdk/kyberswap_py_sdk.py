@@ -5,6 +5,7 @@ from eth_account import Account
 from typing import Optional, Dict, Any
 from web3.middleware import geth_poa_middleware
 import importlib.resources
+import warnings
 
 # Constants
 class AggregatorDomain:
@@ -73,7 +74,12 @@ class KyberSwapSDK:
             raise ValueError("Private key is required for signing transactions.")
         return Account.from_key(self.private_key)
 
-    async def get_swap_route(self, token_in: Token, token_out: Token, amount_in: float) -> Optional[Dict[str, Any]]:
+    async def get_swap_route(self, 
+                             # can be Token or None
+                             token_in: Optional[Token],
+                             token_out: Token, 
+                             amount_in: float
+                             ) -> Optional[Dict[str, Any]]:
         """Fetch the best swap route for a given token pair."""
         target_path = f"/{self.chain}/api/v1/routes"
         params = {
@@ -111,17 +117,33 @@ class KyberSwapSDK:
             return None
 
     async def execute_swap(self, 
-                           token_in: Token, 
-                           token_out: Token, 
-                           amount_in: float, 
-                           slippage_tolerance: int = 10,
-                           gas_fee_wei : int = 100,
-                           gas : int = 200000,
-                           nonce: Optional[int] = None,
-                           ) -> Optional[str]:
+                        token_in: Token, 
+                        token_out: Token, 
+                        amount_in: float, 
+                        slippage_tolerance: int = 10,
+                        gas_fee_wei: Optional[int] = None,  # Must be explicitly set
+                        gas: Optional[int] = None,  # Must be explicitly set
+                        nonce: Optional[int] = None,
+                        txn_type: int = 2,  # Default to Type 2 (EIP-1559)
+                        max_priority_fee_gwei: Optional[int] = None,  # For Type 2
+                        access_list: Optional[list] = None  # For Type 1
+                        ) -> Optional[str]:
         """Execute a swap transaction on-chain."""
         if not self.signer:
             raise ValueError("Signer is required to execute swaps.")
+
+        # Ensure gas_fee_wei and gas are provided
+        if gas_fee_wei is None:
+            raise ValueError("You must explicitly set 'gas_fee_wei' to avoid wasting funds.")
+        if gas is None:
+            raise ValueError("You must explicitly set 'gas' to avoid transaction failure.")
+
+        # Warn users if defaults are used for Type 2
+        if txn_type == 2 and max_priority_fee_gwei is None:
+            warnings.warn(
+                "No 'max_priority_fee_gwei' provided. Using default of 2 gwei, which may not be optimal in high network congestion.",
+                UserWarning
+            )
 
         swap_data = await self.build_swap_transaction(token_in, token_out, amount_in, slippage_tolerance)
         if not swap_data:
@@ -130,21 +152,40 @@ class KyberSwapSDK:
         # Approve token spending
         await self._approve_token(token_in, swap_data['routerAddress'], swap_data['amountIn'])
 
-        # Build and send transaction
+        # Common transaction fields
         transaction = {
             'to': swap_data['routerAddress'],
             'data': swap_data['data'],
             'gas': gas,
-            'gasPrice': self.web3.to_wei( str(gas_fee_wei), 'gwei'),
             'nonce': self.web3.eth.get_transaction_count(self.signer.address) if nonce is None else nonce,
         }
+
+        # Add type-specific fields
+        if txn_type == 0:  # Legacy Transaction (Type 0)
+            transaction['gasPrice'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+
+        elif txn_type == 1:  # EIP-2930 Transaction (Type 1)
+            transaction['type'] = 1
+            transaction['gasPrice'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+            transaction['accessList'] = access_list if access_list else []
+
+        elif txn_type == 2:  # EIP-1559 Transaction (Type 2)
+            transaction['type'] = 2
+            max_priority_fee = self.web3.to_wei(str(max_priority_fee_gwei), 'gwei') if max_priority_fee_gwei else self.web3.to_wei('2', 'gwei')
+            transaction['maxPriorityFeePerGas'] = max_priority_fee
+            transaction['maxFeePerGas'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+
+        else:
+            raise ValueError("Invalid transaction type. Must be 0, 1, or 2.")
+
+        # Sign and send the transaction
         signed_tx = self.signer.sign_transaction(transaction)
         tx_hash = self.web3.eth.send_raw_transaction(signed_tx.rawTransaction)
         print(f"Swap transaction sent with hash: {tx_hash.hex()}")
 
         # Wait for transaction receipt
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_hash)
-        return tx_receipt #.transactionHash.hex()
+        return tx_receipt  # .transactionHash.hex()
 
     async def _approve_token(self, token: Token, spender: str, amount: int):
         """Approve token spending for a given spender."""
