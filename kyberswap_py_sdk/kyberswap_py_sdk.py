@@ -125,7 +125,7 @@ class KyberSwapSDK:
                         gas: Optional[int] = None,  # Must be explicitly set
                         nonce: Optional[int] = None,
                         txn_type: int = 2,  # Default to Type 2 (EIP-1559)
-                        max_priority_fee_gwei: Optional[int] = None,  # For Type 2
+                        max_priority_fee_wei: Optional[int] = None,  # For Type 2
                         access_list: Optional[list] = None  # For Type 1
                         ) -> Optional[str]:
         """Execute a swap transaction on-chain."""
@@ -139,11 +139,8 @@ class KyberSwapSDK:
             raise ValueError("You must explicitly set 'gas' to avoid transaction failure.")
 
         # Warn users if defaults are used for Type 2
-        if txn_type == 2 and max_priority_fee_gwei is None:
-            warnings.warn(
-                "No 'max_priority_fee_gwei' provided. Using default of 2 gwei, which may not be optimal in high network congestion.",
-                UserWarning
-            )
+        if txn_type == 2 and max_priority_fee_wei is None:
+            raise ValueError("You must explicitly set 'max_priority_fee_wei' for Type 2 transactions.")
 
         swap_data = await self.build_swap_transaction(token_in, token_out, amount_in, slippage_tolerance)
         if not swap_data:
@@ -162,18 +159,18 @@ class KyberSwapSDK:
 
         # Add type-specific fields
         if txn_type == 0:  # Legacy Transaction (Type 0)
-            transaction['gasPrice'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+            transaction['gasPrice'] = int(gas_fee_wei)
 
         elif txn_type == 1:  # EIP-2930 Transaction (Type 1)
             transaction['type'] = 1
-            transaction['gasPrice'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+            transaction['gasPrice'] = int(gas_fee_wei)
             transaction['accessList'] = access_list if access_list else []
 
         elif txn_type == 2:  # EIP-1559 Transaction (Type 2)
             transaction['type'] = 2
-            max_priority_fee = self.web3.to_wei(str(max_priority_fee_gwei), 'gwei') if max_priority_fee_gwei else self.web3.to_wei('2', 'gwei')
+            max_priority_fee = int(max_priority_fee_wei)
             transaction['maxPriorityFeePerGas'] = max_priority_fee
-            transaction['maxFeePerGas'] = self.web3.to_wei(str(gas_fee_wei), 'gwei')
+            transaction['maxFeePerGas'] = int(gas_fee_wei)
 
         else:
             raise ValueError("Invalid transaction type. Must be 0, 1, or 2.")
