@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='kyberswap_py_sdk',
-    version='0.2.7',  # Update version as needed
+    version='0.2.8',  # Update version as needed
     author='Harsh',
     author_email='hssingh@connect.ust.hk',
     description='A Python SDK for the KyberSwap Aggregator API',

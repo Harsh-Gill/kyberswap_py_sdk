@@ -39,7 +39,7 @@ pip install kyberswap_py_sdk
 To use the SDK, initialize it with the desired chain, RPC URL, and your private key (optional for read-only operations).
 
 ```Python
-from kyberswap_py_sdk import KyberSwapSDK, ChainName, Token
+from kyberswap_py_sdk import KyberSwapSDK, ChainName, Token, ChainId
 import asyncio
 
 # Define tokens - 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE represents ETH
