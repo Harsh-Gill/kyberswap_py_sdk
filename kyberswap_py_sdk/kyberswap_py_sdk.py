@@ -76,7 +76,7 @@ class KyberSwapSDK:
 
     async def get_swap_route(self, 
                              # can be Token or None
-                             token_in: Optional[Token],
+                             token_in: Token,
                              token_out: Token, 
                              amount_in: float
                              ) -> Optional[Dict[str, Any]]:
@@ -120,9 +120,9 @@ class KyberSwapSDK:
                         token_in: Token, 
                         token_out: Token, 
                         amount_in: float, 
-                        slippage_tolerance: int = 10,
-                        gas_fee_wei: Optional[int] = None,  # Must be explicitly set
-                        gas: Optional[int] = None,  # Must be explicitly set
+                        slippage_tolerance: int,
+                        gas_fee_wei: int,
+                        gas: int,
                         nonce: Optional[int] = None,
                         txn_type: int = 2,  # Default to Type 2 (EIP-1559)
                         max_priority_fee_wei: Optional[int] = None,  # For Type 2
@@ -147,7 +147,8 @@ class KyberSwapSDK:
             return None
 
         # Approve token spending
-        await self._approve_token(token_in, swap_data['routerAddress'], swap_data['amountIn'])
+        if token_in.address != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
+            await self._approve_token(token_in, swap_data['routerAddress'], swap_data['amountIn'])
 
         # Common transaction fields
         transaction = {
@@ -156,6 +157,10 @@ class KyberSwapSDK:
             'gas': gas,
             'nonce': self.web3.eth.get_transaction_count(self.signer.address) if nonce is None else nonce,
         }
+
+        if token_in.address == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
+            transaction['value'] = self.web3.to_wei(str(amount_in), 'ether')
+
 
         # Add type-specific fields
         if txn_type == 0:  # Legacy Transaction (Type 0)
